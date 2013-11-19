@@ -1,24 +1,20 @@
 #include <iostream>
 #include <string>
+#include <cstdlib>
+
 #include "WorldManager.h"
 
 using namespace std;
 
-string FindArg(int argc, char** argv, string flag)
+char* FindArg(int argc, char** argv, char flag)
 {
 	for (int i = 0; i < argc; i++)
 	{
-		string arg(argv[i]);
-
-		if (arg == flag && i < argc - 1)
-		{
-			string val(arg[i + 1]);
-
-			return val;
-		}
+		if (argv[i][0] == '-' && argv[i][1] == flag && i < argc - 1)
+			return argv[i + 1];
 	}
 
-	return "";
+	return 0;
 }
 
 /**
@@ -26,12 +22,14 @@ string FindArg(int argc, char** argv, string flag)
  */
 int main(int argc, char** argv)
 {
-	string worldfile = FindArg(argc, argv, "-f");
+	char* worldFile = FindArg(argc, argv, 'f');
+	char* outputFile = FindArg(argc, argv, 'o');
+	double tick = atof(FindArg(argc, argv, 't'));
 
-	WorldManager* wm = new WorldManager(worldfile);
+	WorldManager* wm = new WorldManager(worldFile, outputFile, tick > 0.0 ? tick : 0.0166667);
 
 	cout << "Initializing world from world file " << worldFile << "..." << endl;
-	wm.InitializeWorld();
+	wm->InitializeWorld();
 	cout << "World initialized" << endl;
 
 	return 0;

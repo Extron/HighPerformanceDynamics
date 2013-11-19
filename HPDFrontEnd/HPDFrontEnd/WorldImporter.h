@@ -1,6 +1,10 @@
-#include "btWorldImporter.h"
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletWorldImporter.h>
 
-class WorldImporter : public btBulletWorldImporter
+#include "HPDMotionState.h"
+
+class WorldImporter: public btBulletWorldImporter
 {
 public:
 	/**

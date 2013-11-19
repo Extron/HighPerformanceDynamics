@@ -2,7 +2,7 @@
 
 
 WorldImporter::WorldImporter(btDynamicsWorld* world)
-	:btBulletWorldImporter(world)
+	: btBulletWorldImporter(world)
 {
 }
 

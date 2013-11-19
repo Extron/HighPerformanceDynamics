@@ -1,12 +1,13 @@
 #include "HPDMotionState.h"
 
 
-HPDMotionState::HPDMotionState(const btTransform& startTrans = btTransform::getIdentity(),const btTransform& centerOfMassOffset = btTransform::getIdentity())
+HPDMotionState::HPDMotionState(const btTransform& startTrans, const btTransform& centerOfMassOffset)
 {
+	stateChanged = false;
 }
 
 void HPDMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans)
 {
 	m_graphicsWorldTrans = centerOfMassWorldTrans * m_centerOfMassOffset;
-	stateChange = true;
+	stateChanged = true;
 }
