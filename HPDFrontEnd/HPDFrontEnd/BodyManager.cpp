@@ -35,23 +35,20 @@ btMotionState* BodyManager::GetMotionState()
 
 void BodyManager::WriteInt(int n, vector<char>* frame)
 {
-	char* byteArray = (char*)n;
-
 	for (int i = 0; i < sizeof(n); i++)
-		frame->push_back(byteArray[i]);
+		frame->push_back((char)(n >> i * 8 & 0xFF));
 }
 
 void BodyManager::WriteUInt(unsigned int n, vector<char>* frame)
 {
-	char* byteArray = (char*)n;
-
 	for (int i = 0; i < sizeof(n); i++)
-		frame->push_back(byteArray[i]);
+		frame->push_back((char)(n >> i * 8 & 0xFF));
 }
 
 void BodyManager::WriteScalar(btScalar x, vector<char>* frame)
 {
-	char* byteArray = static_cast<char*>(x);
+    double value = static_cast<double>(x);
+	char* byteArray = reinterpret_cast<char*>(&value);
 
 	for (int i = 0; i < sizeof(x); i++)
 		frame->push_back(byteArray[i]);

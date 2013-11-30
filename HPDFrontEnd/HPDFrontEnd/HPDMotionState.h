@@ -1,3 +1,5 @@
+#pragma once
+
 #include <btDefaultMotionState.h>
 
 /**
@@ -17,6 +19,8 @@ public:
 	 * Creates a new HPD motion state.
 	 */
 	HPDMotionState(const btTransform& startTrans = btTransform::getIdentity(), const btTransform& centerOfMassOffset = btTransform::getIdentity());
+
+    ~HPDMotionState() {};
 
 	/**
 	 * Gets wether the motion state has changed since last checked.

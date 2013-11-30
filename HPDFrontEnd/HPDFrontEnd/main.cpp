@@ -24,13 +24,29 @@ int main(int argc, char** argv)
 {
 	char* worldFile = FindArg(argc, argv, 'f');
 	char* outputFile = FindArg(argc, argv, 'o');
-	double tick = atof(FindArg(argc, argv, 't'));
+	char* tickStr = FindArg(argc, argv, 't');
+    char* iterStr = FindArg(argc, argv, 'n');
 
-	WorldManager* wm = new WorldManager(worldFile, outputFile, tick > 0.0 ? tick : 0.0166667);
+    double tick = 0.0166667;
+    int iterations = 100;
 
-	cout << "Initializing world from world file " << worldFile << "..." << endl;
+    if (tickStr)
+        tick = atof(tickStr);
+
+    if (iterStr)
+        iterations = atoi(iterStr);
+
+	WorldManager* wm = new WorldManager(worldFile, outputFile, tick, iterations);
+
+	cout << "Initializing world from world file " << worldFile << endl;
 	wm->InitializeWorld();
-	cout << "World initialized" << endl;
+	cout << "World initialized." << endl;
+
+    cout << "Beginning simulation.  Running " << iterations << " iterations, time step " << tick << " seconds." << endl;
+    while (!wm->IsComplete())
+        wm->Tick();
+
+    cout << "Simulation complete.  Rendered simulation stored in " << outputFile << endl;
 
 	return 0;
 }

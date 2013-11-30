@@ -46,24 +46,18 @@ vector<BodyManager>* FrameManager::GetActiveBodies()
 
 void FrameManager::WriteUInt(unsigned int n, vector<char>* frame)
 {
-	char* byteArray = (char*)n;
-
 	for (int i = 0; i < sizeof(n); i++)
-		frame->push_back(byteArray[i]);
+		frame->push_back((char)(n >> i * 8 & 0xFF));
 }
 
 void FrameManager::WriteUShort(unsigned short n, vector<char>* frame)
 {
-	char* byteArray = (char*)n;
-
 	for (int i = 0; i < sizeof(n); i++)
-		frame->push_back(byteArray[i]);
+		frame->push_back((char)(n >> i * 8 & 0xFF));
 }
 
 void FrameManager::WriteULong(unsigned long n, vector<char>* frame)
 {
-	char* byteArray = (char*)n;
-
 	for (int i = 0; i < sizeof(n); i++)
-		frame->push_back(byteArray[i]);
+		frame->push_back((char)(n >> i * 8 & 0xFF));
 }

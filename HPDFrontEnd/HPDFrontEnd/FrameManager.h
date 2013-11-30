@@ -1,9 +1,12 @@
 #include <vector>
+#include <iostream>
+//#include <unistd>
 
 #include "Dynamics/btRigidBody.h"
 
 #include "BodyManager.h"
 
+using namespace std;
 
 class FrameManager
 {

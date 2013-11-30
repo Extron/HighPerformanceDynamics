@@ -1,10 +1,12 @@
 #include "WorldManager.h"
 
-WorldManager::WorldManager(char* worldFile, char* outputFile, btScalar tickInterval)
+WorldManager::WorldManager(char* worldFile, char* outputFile, btScalar tickInterval, int iterations)
 {
 	this->worldFile = worldFile;
 	this->outputFile = outputFile;
 	this->tickInterval = tickInterval;
+    this->iterations = iterations;
+    this->currentIteration = 0;
 
 	frameManager = new FrameManager();
 	frameCount = 0;
@@ -56,25 +58,45 @@ void WorldManager::InitializeWorld()
 	}
 }
 
+void WorldManager::Tick()
+{
+    //cout << "Performing iteration " << currentIteration << ", time " << tickInterval * currentIteration << " seconds." << endl;
+    world->stepSimulation(tickInterval, 1, tickInterval);
+    currentIteration++;
+    //cout << "Beginning write to frame " << frameCount << "." << endl;
+    WriteFrame();
+}
+
+bool WorldManager::IsComplete()
+{
+    return currentIteration >= iterations;
+}
+
 void WorldManager::WriteFrame()
 {
 	vector<char>* frame = new vector<char>();
-	
+    	
 	frameManager->WriteFrame(frameCount, frame);
 
 	frameCount++;
 
-	ofstream output(outputFile);
+	ofstream output;
+
+    output.open(outputFile, ios::out | ios::app | ios::binary);
 
 	//TODO: This will likely need to be parallized, and we might want to use HDF to do this.
 	if (output.is_open())
 	{
 		output.seekp(2, ios_base::beg);
-		char* byteArray = (char*)frameCount;
-		output.write(byteArray, 4);
-
+        
+        for (int i = 0; i < sizeof(frameCount); i++)
+        {
+            char byte = frameCount >> i * 8 & 0xFF;
+            output.write(&byte, 1);
+        }
+        
 		output.seekp(0, ios_base::end);
-		output.write((*frame)[0], frame->size());
+		output.write(&(*frame)[0], frame->size());
 		output.close();
 	}
 }

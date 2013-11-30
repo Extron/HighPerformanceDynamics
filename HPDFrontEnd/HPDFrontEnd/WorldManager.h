@@ -17,7 +17,7 @@ using namespace std;
 class WorldManager
 {
 public:
-	WorldManager(char* worldfile, char* outputFile, btScalar tickInterval = 0.016666667);
+	WorldManager(char* worldfile, char* outputFile, btScalar tickInterval = 0.016666667, int iterations = 100);
 
 
 	/**
@@ -31,6 +31,11 @@ public:
 	 * Ticks the simulation one time step.
 	 */
 	void Tick();
+
+    /**
+     * Determines if the simulation is complete.
+     */
+    bool IsComplete();
 
 	/** 
 	 * Writes a frame to the output file.
@@ -62,6 +67,16 @@ private:
 	 * The file to output the frames to.
 	 */
 	char* outputFile;
+
+    /**
+     * The number of iterations that the simulation will run.
+     */
+    int iterations;
+
+    /**
+     * The current iteration that the simulation is running on.
+     */
+    int currentIteration;
 
 	/**
 	 * Stores the current number of frames that have been generated.
