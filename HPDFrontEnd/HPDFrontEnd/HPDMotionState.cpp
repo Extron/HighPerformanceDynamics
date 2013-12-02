@@ -3,7 +3,7 @@
 
 HPDMotionState::HPDMotionState(const btTransform& startTrans, const btTransform& centerOfMassOffset)
 {
-	stateChanged = false;
+	stateChanged = true;
 }
 
 void HPDMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans)

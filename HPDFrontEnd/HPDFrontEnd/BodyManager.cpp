@@ -50,7 +50,7 @@ void BodyManager::WriteScalar(btScalar x, vector<char>* frame)
     double value = static_cast<double>(x);
 	char* byteArray = reinterpret_cast<char*>(&value);
 
-	for (int i = 0; i < sizeof(x); i++)
+	for (int i = 0; i < sizeof(double); i++)
 		frame->push_back(byteArray[i]);
 }
 
