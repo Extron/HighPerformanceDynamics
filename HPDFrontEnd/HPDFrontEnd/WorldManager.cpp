@@ -35,9 +35,16 @@ void WorldManager::InitializeWorld()
 
 	if (output.is_open())
 	{
-		char byteArray[6] = { 0x0, 0x6, 0x0, 0x0, 0x0, 0x0 };
+		char byteArray[2] = { 0x0, 0x6};
 
-		output.write(byteArray, 6);
+		output.write(byteArray, 2);
+
+        for (int i = 0; i < sizeof(iterations); i++)
+        {
+            char byte = iterations >> i * 8 & 0xFF;
+            output.write(&byte, 1);
+        }
+
 		output.close();
 	}
 	else
@@ -87,13 +94,13 @@ void WorldManager::WriteFrame()
 	//TODO: This will likely need to be parallized, and we might want to use HDF to do this.
 	if (output.is_open())
 	{
-		output.seekp(2, ios_base::beg);
+		//output.seekp(2, ios_base::beg);
         
-        for (int i = 0; i < sizeof(frameCount); i++)
-        {
-            char byte = frameCount >> i * 8 & 0xFF;
-            output.write(&byte, 1);
-        }
+        //for (int i = 0; i < sizeof(frameCount); i++)
+        //{
+            //char byte = frameCount >> i * 8 & 0xFF;
+            //output.write(&byte, 1);
+        //}
         
 		output.seekp(0, ios_base::end);
 		output.write(&(*frame)[0], frame->size());
