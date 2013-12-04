@@ -40,6 +40,8 @@ private:
 public:
 	FrameManager();
 
+    void WriteInitialState(vector<char>* buffer);
+
 	/**
 	 * Writes the frame to a buffer that can be saved.
 	 */

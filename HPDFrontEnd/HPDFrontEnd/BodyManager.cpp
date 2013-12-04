@@ -7,6 +7,66 @@ BodyManager::BodyManager(btRigidBody* body, unsigned int id)
 	this->id = id;
 }
 
+int BodyManager::GetInitialStateSize()
+{
+    btCollisionShape* shape = body->getCollisionShape();
+
+    btBoxShape* box = dynamic_cast<btBoxShape*>(shape);
+
+    if (box)
+        return 26;
+
+    btSphereShape* sphere = dynamic_cast<btSphereShape*>(shape);
+
+    if (sphere)
+        return 10;
+
+    btCylinderShape* cylinder = dynamic_cast<btCylinderShape*>(shape);
+    
+    if (cylinder)
+        return 18;
+
+    return 0;
+}
+
+void BodyManager::WriteInitialState(vector<char>* frame)
+{
+    WriteStateToFrame(frame);
+
+    btCollisionShape* shape = body->getCollisionShape();
+
+    btBoxShape* box = dynamic_cast<btBoxShape*>(shape);
+
+    if (box)
+    {
+        frame->push_back((char)26);
+        frame->push_back((char)0);
+        WriteVector3(box->getHalfExtentsWithoutMargin() * 2, frame);
+        return;
+    }
+
+    btSphereShape* sphere = dynamic_cast<btSphereShape*>(shape);
+
+    if (sphere)
+    {
+        frame->push_back((char)10);
+        frame->push_back((char)1);
+        WriteScalar(sphere->getRadius(), frame);
+        return;
+    }
+
+    btCylinderShape* cylinder = dynamic_cast<btCylinderShape*>(shape);
+
+    if (cylinder)
+    {
+        frame->push_back((char)18);
+        frame->push_back((char)2);
+        WriteScalar(cylinder->getRadius(), frame);
+        WriteScalar(cylinder->getHalfExtentsWithMargin()[cylinder->getUpAxis()], frame);
+        return;
+    }
+}
+
 void BodyManager::WriteStateToFrame(vector<char>* frame)
 {
 	HPDMotionState* motionState = dynamic_cast<HPDMotionState*>(body->getMotionState());

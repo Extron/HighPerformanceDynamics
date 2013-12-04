@@ -6,6 +6,21 @@ FrameManager::FrameManager()
 	bodies = new vector<BodyManager>();
 }
 
+void FrameManager::WriteInitialState(vector<char>* buffer)
+{
+    unsigned long length;
+    unsigned int size = bodies->size();
+
+    for (vector<BodyManager>::iterator i = bodies->begin(); i != bodies->end(); i++)
+        length += (unsigned long)i->GetInitialStateSize();
+
+    WriteULong(length, buffer);
+    WriteUInt(size, buffer);
+
+    for (vector<BodyManager>::iterator i = bodies->begin(); i != bodies->end(); i++)
+        i->WriteInitialState(buffer);
+}
+
 void FrameManager::WriteFrame(unsigned int frameID, vector<char>* buffer)
 {
 	//TODO: This code is not parallizable yet.  Needs to be eventually to help speed up file read/write.

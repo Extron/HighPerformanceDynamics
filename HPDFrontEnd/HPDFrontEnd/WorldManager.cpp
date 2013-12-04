@@ -44,25 +44,29 @@ void WorldManager::InitializeWorld()
             char byte = iterations >> i * 8 & 0xFF;
             output.write(&byte, 1);
         }
+    }
+    else
+    {
+        cout << "ERROR: Could not create output file " << outputFile << endl;
+        return;
+    }
 
-		output.close();
-	}
-	else
-	{
-		cout << "ERROR: Could not create output file " << outputFile << endl;
-		return;
-	}
+    btCollisionObjectArray objects = world->getCollisionObjectArray();
 
-	btCollisionObjectArray objects = world->getCollisionObjectArray();
+    for (unsigned int i = 0; i < objects.size(); i++)
+    {
+        btRigidBody* object = dynamic_cast<btRigidBody*>(objects[i]);
+            
+        if (object)
+            frameManager->AddBody(object, i);
+    }
+    
+    vector<char>* buffer = new vector<char>();
 
-	//TODO: This can be parallelized as well to speed up initialization.
-	for (unsigned int i = 0; i < objects.size(); i++)
-	{
-		btRigidBody* object = dynamic_cast<btRigidBody*>(objects[i]);
-
-		if (object)
-			frameManager->AddBody(object, i);
-	}
+    frameManager->WriteInitialState(buffer);
+    
+    output.write(&(*buffer)[0], buffer->size());
+    output.close();
 }
 
 void WorldManager::Tick()

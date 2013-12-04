@@ -3,6 +3,7 @@
 #include "Dynamics/btRigidBody.h"
 #include "LinearMath/btVector3.h"
 #include "LinearMath/btScalar.h"
+#include <btBulletCollisionCommon.h>
 
 #include "HPDMotionState.h"
 
@@ -20,6 +21,10 @@ public:
 	 * Creates a new rigid body manager.
 	 */
 	BodyManager(btRigidBody* body, unsigned int id);
+    
+    int GetInitialStateSize();
+
+    void WriteInitialState(vector<char>* frame);
 
 	/**
 	 * Writes the body's state to a given frame buffer.
