@@ -29,29 +29,37 @@ int BodyManager::GetInitialStateSize()
     return 0;
 }
 
-void BodyManager::WriteInitialState(vector<char>* frame)
+void BodyManager::WriteInitialState(ofstream* fout)
 {
-    WriteStateToFrame(frame);
+    WriteStateToFrame(fout);
 
     btCollisionShape* shape = body->getCollisionShape();
 
     btBoxShape* box = dynamic_cast<btBoxShape*>(shape);
 
+    char size, type;
+
     if (box)
     {
-        frame->push_back((char)26);
-        frame->push_back((char)0);
-        WriteVector3(box->getHalfExtentsWithoutMargin() * 2, frame);
+        size = 26;
+        type = 0;
+        fout->write(&size, sizeof(char));
+        fout->write(&type, sizeof(char));
+
+        WriteVector3(box->getHalfExtentsWithoutMargin() * 2, fout);
         return;
     }
 
     btSphereShape* sphere = dynamic_cast<btSphereShape*>(shape);
 
     if (sphere)
-    {
-        frame->push_back((char)10);
-        frame->push_back((char)1);
-        WriteScalar(sphere->getRadius(), frame);
+    {        
+        size = 10;
+        type = 1;
+        fout->write(&size, sizeof(char));
+        fout->write(&type, sizeof(char));
+
+        WriteScalar(sphere->getRadius(), fout);
         return;
     }
 
@@ -59,15 +67,18 @@ void BodyManager::WriteInitialState(vector<char>* frame)
 
     if (cylinder)
     {
-        frame->push_back((char)18);
-        frame->push_back((char)2);
-        WriteScalar(cylinder->getRadius(), frame);
-        WriteScalar(cylinder->getHalfExtentsWithMargin()[cylinder->getUpAxis()], frame);
+        size = 18;
+        type = 2;
+        fout->write(&size, sizeof(char));
+        fout->write(&type, sizeof(char));
+
+        WriteScalar(cylinder->getRadius(), fout);
+        WriteScalar(cylinder->getHalfExtentsWithMargin()[cylinder->getUpAxis()], fout);
         return;
     }
 }
 
-void BodyManager::WriteStateToFrame(vector<char>* frame)
+void BodyManager::WriteStateToFrame(ofstream* fout)
 {
 	HPDMotionState* motionState = dynamic_cast<HPDMotionState*>(body->getMotionState());
 
@@ -77,12 +88,11 @@ void BodyManager::WriteStateToFrame(vector<char>* frame)
 
 		motionState->getWorldTransform(transform);
 
-		WriteUInt(id, frame);
+        fout->write((char*)&id, sizeof(unsigned int));
 
-		WriteVector3(transform.getOrigin(), frame);
-
+		WriteVector3(transform.getOrigin(), fout);
 		btQuaternion rotation = transform.getRotation();
-		WriteAxisAngle(rotation.getAxis(), rotation.getAngle(), frame);
+		WriteAxisAngle(rotation.getAxis(), rotation.getAngle(), fout);
 
 		motionState->ResetStateChanged();
 	}
@@ -93,38 +103,24 @@ btMotionState* BodyManager::GetMotionState()
 	return body->getMotionState();
 }
 
-void BodyManager::WriteInt(int n, vector<char>* frame)
-{
-	for (int i = 0; i < sizeof(n); i++)
-		frame->push_back((char)(n >> i * 8 & 0xFF));
-}
-
-void BodyManager::WriteUInt(unsigned int n, vector<char>* frame)
-{
-	for (int i = 0; i < sizeof(n); i++)
-		frame->push_back((char)(n >> i * 8 & 0xFF));
-}
-
-void BodyManager::WriteScalar(btScalar x, vector<char>* frame)
+void BodyManager::WriteScalar(btScalar x, ofstream* fout)
 {
     double value = static_cast<double>(x);
 	char* byteArray = reinterpret_cast<char*>(&value);
-
-	for (int i = 0; i < sizeof(double); i++)
-		frame->push_back(byteArray[i]);
+    fout->write(byteArray, sizeof(double));
 }
 
-void BodyManager::WriteVector3(btVector3 v, vector<char>* frame)
+void BodyManager::WriteVector3(btVector3 v, ofstream* fout)
 {
-	WriteScalar(v.x(), frame);
-	WriteScalar(v.y(), frame);
-	WriteScalar(v.z(), frame);
+	WriteScalar(v.x(), fout);
+	WriteScalar(v.y(), fout);
+	WriteScalar(v.z(), fout);
 }
 
-void BodyManager::WriteAxisAngle(btVector3 a, btScalar th, vector<char>* frame)
+void BodyManager::WriteAxisAngle(btVector3 a, btScalar th, ofstream* fout)
 {
-	WriteScalar(a.x(), frame);
-	WriteScalar(a.y(), frame);
-	WriteScalar(a.z(), frame);
-	WriteScalar(th, frame);
+	WriteScalar(a.x(), fout);
+	WriteScalar(a.y(), fout);
+	WriteScalar(a.z(), fout);
+	WriteScalar(th, fout);
 }

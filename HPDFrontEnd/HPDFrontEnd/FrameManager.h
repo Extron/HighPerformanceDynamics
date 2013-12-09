@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
-//#include <unistd>
+#include <fstream>
+#include <mpi.h>
 
 #include "Dynamics/btRigidBody.h"
 
@@ -16,40 +17,47 @@ private:
 	 */
 	vector<BodyManager>* bodies;
 
+    /**
+     * The processor rank of the running process.
+     */
+    int rank;
+
+    /**
+     * The number of running processes.
+     */
+    int size;
+
+
 
 	/**
 	 * Gets a list of all bodies that have changed their state since the last update.
 	 */
 	vector<BodyManager>* GetActiveBodies();
 
-	/**
-	 * Converts an unsigned integer to a byte array and writes that to the frame buffer.
-	 */
-	void WriteUInt(unsigned int n, vector<char>* frame);
-
-	/**
-	 * Converts an unsigned short to a byte array and writes that to the frame buffer.
-	 */
-	void WriteUShort(unsigned short n, vector<char>* frame);
-
-	/**
-	 * Converts an unsigned long to a byte array and writes that to the frame buffer.
-	 */
-	void WriteULong(unsigned long n, vector<char>* frame);
-
 public:
-	FrameManager();
+    /**
+     * Creates a new frame manager to maintain frame writing.
+     *
+     * @param rank - The rank of the process that created this frame manager.
+     * @param size - The number of processes that are running the program.
+     */
+	FrameManager(int rank, int size);
 
-    void WriteInitialState(vector<char>* buffer);
+    /**
+     * Writes the initial state of the world to a buffer.  This is needed because 
+     * to render the frames later, we need to know their types, and some bodies will
+     * be static, in which case they will not store their positions in the frame buffers,
+     * and this provides a way to store them once, so that we know where they are when we render.
+     */
+    void WriteInitialState(ofstream* fout);
 
 	/**
 	 * Writes the frame to a buffer that can be saved.
 	 */
-	void WriteFrame(unsigned int frameID, vector<char>* buffer);
+	void WriteFrame(unsigned int frameID, ofstream* fout);
 
 	/**
 	 * Adds a new body manager to the frame manager.
 	 */
 	void AddBody(btRigidBody* body, unsigned int id);
 };
-
