@@ -17,7 +17,7 @@ using namespace std;
 class WorldManager
 {
 public:
-	WorldManager(char* worldfile, char* outputFile, btScalar tickInterval = 0.016666667, int iterations = 100);
+	WorldManager(char* worldfile, char* outputFile, int rank, int size, btScalar tickInterval = 0.016666667, int iterations = 100);
 
 
 	/**
@@ -67,6 +67,16 @@ private:
 	 * The file to output the frames to.
 	 */
 	char* outputFile;
+
+    /**
+     * The rank of the process that owns this class.
+     */
+    int rank;
+
+    /**
+     * The total number of processes that are running the program.
+     */
+    int size;
 
     /**
      * The number of iterations that the simulation will run.

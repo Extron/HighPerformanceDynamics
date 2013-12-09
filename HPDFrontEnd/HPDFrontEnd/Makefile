@@ -1,4 +1,4 @@
-CC=g++
+CC=mpicxx
 INC=-I../../Bullet/src \
 	-I../../Bullet/src/BulletDynamics \
 	-I../../Bullet/src/BulletCollision \

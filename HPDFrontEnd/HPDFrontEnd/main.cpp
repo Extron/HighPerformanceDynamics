@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <mpi.h>
 
 #include "WorldManager.h"
 
@@ -36,17 +37,36 @@ int main(int argc, char** argv)
     if (iterStr)
         iterations = atoi(iterStr);
 
+    MPI_Init(&argc, &argv);
 	WorldManager* wm = new WorldManager(worldFile, outputFile, tick, iterations);
+    
+    int size, rank;
 
-	cout << "Initializing world from world file " << worldFile << endl;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    
+    if (rank == 0)
+	    cout << "Initializing world from world file " << worldFile << endl;
+
 	wm->InitializeWorld();
-	cout << "World initialized." << endl;
 
-    cout << "Beginning simulation.  Running " << iterations << " iterations, time step " << tick << " seconds." << endl;
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0)
+    {
+	    cout << "World initialized." << endl;
+        cout << "Beginning simulation.  Running " << iterations << " iterations, time step " << tick << " seconds." << endl;
+    }
+
     while (!wm->IsComplete())
         wm->Tick();
 
-    cout << "Simulation complete.  Rendered simulation stored in " << outputFile << endl;
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0)
+        cout << "Simulation complete.  Rendered simulation stored in " << outputFile << endl;
+
+    MPI_Finalize();
 
 	return 0;
 }

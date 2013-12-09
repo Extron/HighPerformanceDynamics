@@ -1,14 +1,16 @@
 #include "WorldManager.h"
 
-WorldManager::WorldManager(char* worldFile, char* outputFile, btScalar tickInterval, int iterations)
+WorldManager::WorldManager(char* worldFile, char* outputFile, int rank, int size, btScalar tickInterval, int iterations)
 {
 	this->worldFile = worldFile;
 	this->outputFile = outputFile;
 	this->tickInterval = tickInterval;
     this->iterations = iterations;
     this->currentIteration = 0;
+    this->rank = rank;
+    this->size = size;
 
-	frameManager = new FrameManager();
+	frameManager = new FrameManager(rank, size);
 	frameCount = 0;
 }
 
@@ -35,14 +37,23 @@ void WorldManager::InitializeWorld()
 
 	if (output.is_open())
 	{
-		char byteArray[2] = { 0x0, 0x6};
-
-		output.write(byteArray, 2);
-
-        for (int i = 0; i < sizeof(iterations); i++)
+        if (!rank)
         {
-            char byte = iterations >> i * 8 & 0xFF;
-            output.write(&byte, 1);
+		    char byteArray[2] = { 0x0, 0x6};
+
+		    output.write(byteArray, 2);
+
+            for (int i = 0; i < sizeof(iterations); i++)
+            {
+                char byte = iterations >> i * 8 & 0xFF;
+                output.write(&byte, 1);
+            }
+        }
+        else
+        {
+            //We have written in rank 0, but no other processes will see the write, so we must advance the 
+            //current position in the file.
+            output.seekp(2 + sizeof(int));
         }
     }
     else
@@ -53,6 +64,7 @@ void WorldManager::InitializeWorld()
 
     btCollisionObjectArray objects = world->getCollisionObjectArray();
 
+    //TODO: This is where we need to devide the world up into the ranks.
     for (unsigned int i = 0; i < objects.size(); i++)
     {
         btRigidBody* object = dynamic_cast<btRigidBody*>(objects[i]);
@@ -61,11 +73,7 @@ void WorldManager::InitializeWorld()
             frameManager->AddBody(object, i);
     }
     
-    vector<char>* buffer = new vector<char>();
-
-    frameManager->WriteInitialState(buffer);
-    
-    output.write(&(*buffer)[0], buffer->size());
+    frameManager->WriteInitialState(&output); 
     output.close();
 }
 
@@ -85,29 +93,14 @@ bool WorldManager::IsComplete()
 
 void WorldManager::WriteFrame()
 {
-	vector<char>* frame = new vector<char>();
-    	
-	frameManager->WriteFrame(frameCount, frame);
+	ofstream fout;
+    fout.open(outputFile, ios::out | ios::app | ios::binary);
 
-	frameCount++;
+    if (fout.is_open())
+    {
+	    frameManager->WriteFrame(frameCount, &fout);
+	    frameCount++;
+    }
 
-	ofstream output;
-
-    output.open(outputFile, ios::out | ios::app | ios::binary);
-
-	//TODO: This will likely need to be parallized, and we might want to use HDF to do this.
-	if (output.is_open())
-	{
-		//output.seekp(2, ios_base::beg);
-        
-        //for (int i = 0; i < sizeof(frameCount); i++)
-        //{
-            //char byte = frameCount >> i * 8 & 0xFF;
-            //output.write(&byte, 1);
-        //}
-        
-		output.seekp(0, ios_base::end);
-		output.write(&(*frame)[0], frame->size());
-		output.close();
-	}
+    fout.close();
 }
