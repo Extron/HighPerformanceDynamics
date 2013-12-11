@@ -7,6 +7,7 @@
 #include "WorldImporter.h"
 #include "HPDMotionState.h"
 #include "FrameManager.h"
+#include "HPDDynamicsWorld.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ using namespace std;
 class WorldManager
 {
 public:
-	WorldManager(char* worldfile, char* outputFile, int rank, int size, btScalar tickInterval = 0.016666667, int iterations = 100);
+	WorldManager(char* worldfile, char* outputFile, btScalar tickInterval = 0.016666667, int iterations = 100);
 
 
 	/**
@@ -25,7 +26,7 @@ public:
 	 *
 	 * @return - Returns the new Bullet world simulator.
 	 */
-	void InitializeWorld();
+	void InitializeWorld(int rank, int size, int* worldBounds, double* processBounds);
 
 	/**
 	 * Ticks the simulation one time step.
@@ -46,7 +47,7 @@ private:
 	/**
 	 * The Bullet world to use to simulate.
 	 */
-	btDiscreteDynamicsWorld* world;
+	HPDDynamicsWorld* world;
 
 	/**
 	 * The frame manager, which stores data used to write frames out to the output file.

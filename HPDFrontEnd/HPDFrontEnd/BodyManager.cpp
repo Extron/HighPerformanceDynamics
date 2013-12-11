@@ -1,5 +1,7 @@
 #include "BodyManager.h"
+#include <iostream>
 
+using namespace std;
 
 BodyManager::BodyManager(btRigidBody* body, unsigned int id)
 {
