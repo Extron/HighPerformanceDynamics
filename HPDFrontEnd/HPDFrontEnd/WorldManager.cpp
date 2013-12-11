@@ -1,21 +1,22 @@
 #include "WorldManager.h"
 
-WorldManager::WorldManager(char* worldFile, char* outputFile, int rank, int size, btScalar tickInterval, int iterations)
+WorldManager::WorldManager(char* worldFile, char* outputFile, btScalar tickInterval, int iterations)
 {
 	this->worldFile = worldFile;
 	this->outputFile = outputFile;
 	this->tickInterval = tickInterval;
     this->iterations = iterations;
     this->currentIteration = 0;
+}
+
+void WorldManager::InitializeWorld(int rank, int size, int* worldBounds, double* bounds)
+{
     this->rank = rank;
     this->size = size;
 
-	frameManager = new FrameManager(rank, size);
-	frameCount = 0;
-}
+    frameManager = new FrameManager(rank, size);
+    frameCount = 0;
 
-void WorldManager::InitializeWorld()
-{
 	//TODO: All of these parts of the physics sim can be overridden and we can implement our own.  We will likely need to do that
 	//for MPI, at least for a few of them.
 	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -23,7 +24,7 @@ void WorldManager::InitializeWorld()
 	btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
 	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
 
-	world = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+	world = new HPDDynamicsWorld(rank, size, worldBounds, btVector3(bounds[0], bounds[1], bounds[2]), dispatcher, overlappingPairCache, solver, collisionConfiguration);
 
 	WorldImporter* fileLoader = new WorldImporter(world);
 
@@ -39,15 +40,16 @@ void WorldManager::InitializeWorld()
 	{
         if (!rank)
         {
-		    char byteArray[2] = { 0x0, 0x6};
+		    char byteArray[2] = { 0x6, 0x0};
 
 		    output.write(byteArray, 2);
+            output.write((char*)&iterations, sizeof(iterations));
 
-            for (int i = 0; i < sizeof(iterations); i++)
+            /*for (int i = 0; i < sizeof(iterations); i++)
             {
                 char byte = iterations >> i * 8 & 0xFF;
                 output.write(&byte, 1);
-            }
+            }*/
         }
         else
         {
